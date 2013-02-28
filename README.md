@@ -1,7 +1,7 @@
 textilera
 =========
 
-Tools for converting qrcode images to Janome .jef files. It uses [python-showjef (https://bitbucket.org/dboddie/python-showjef)] to convert svg files to .jef format
+Tools for converting qrcode images to Janome .jef files. It uses [python-showjef] (https://bitbucket.org/dboddie/python-showjef) to convert svg files to .jef format.
 
 requirements:
 
