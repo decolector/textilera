@@ -1,2 +1,9 @@
+Cython==0.18
+PIL==1.1.7
+argparse==1.2.1
+distribute==0.6.24
+numpy==1.7.0
+pypotrace==0.1
+qrcode==2.5
 svgwrite==1.1.2
-SIP
+wsgiref==0.1.2
