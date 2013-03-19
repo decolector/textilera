@@ -35,7 +35,7 @@ for a in range(500): #iterate over height of the coordinate system
 
             else:
                 i = i + 1
-
+    print "len nodeX: ", len(nodeX)
     for x in range(0, len(nodeX),2):
         #draw the line
         p.push(nodeX[x],a, nodeX[x+1],a)

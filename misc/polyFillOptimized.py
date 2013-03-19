@@ -32,7 +32,7 @@ for a in range(500): #iterate over height of the coordinate system
 
     #sort the nodes
     nodeX.sort()
-    
+    print "len nodeX: ", len(nodeX)    
     # loop to draw the lines
     for x in range(0, len(nodeX),2):
         p.push(nodeX[x],a, nodeX[x+1],a)
