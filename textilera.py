@@ -36,7 +36,7 @@ def fill(polygons, height):
             if(len(nodeX) > 1):
                 for x in range(0, len(nodeX), 2):
                     p.push('M', nodeX[x], float(a))
-                    p.push('L', nodeX[x+1], float(a))
+                    p.push('L',nodeX[x], float(a), nodeX[x+1], float(a))
 
     d.add(p)
     d.save()
@@ -60,9 +60,10 @@ def contour(polygons):
 qr = qrcode.make('hola')
 temp = qr._img
 height = temp.size[1]
+print height
 temp.convert('L')
 bit = potrace.Bitmap(numpy.asarray(temp)) 
-traced = bit.trace(turdsize = 5, 
+traced = bit.trace(turdsize = 40, 
         turnpolicy = potrace.TURNPOLICY_RANDOM, 
         alphamax = 0.0, 
         opticurve = 1, 
@@ -70,30 +71,17 @@ traced = bit.trace(turdsize = 5,
 polygons = []
 
 for curve in traced.curves:
-    print "children: ", len(curve.children)
-    vertex = []
-    for segment in curve:
-        
-        #we just need the corners
-        """
-        if segment.is_corner:
-        
-            vertex.append(segment.end_point)
-            print(segment.end_point)
-        """
-        #or we need everything
-        vertex.append(segment.end_point)
-
-    if len(vertex) > 0:
-        #append copy the first point at the end
-        vertex.append(vertex[0])
-        print vertex[0], " and ", vertex[-1]
-
+    #print "children: ", len(curve.children)
+    vertex = list(curve.tesselate(potrace.Curve.adaptive))
+    vertex.append(vertex[0])
     polygons.append(vertex)
+    
 
+#print len(polygons[0])
+polygons.pop(0)
 #contour or fill
-#fill(polygons, height)
-contour(polygons)
+fill(polygons, height)
+#contour(polygons)
 
 
 
