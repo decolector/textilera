@@ -19,3 +19,7 @@ SIP is not installable with pip as well, so:
     cp /usr/lib/python2.7/dist-packages/sipconfig.py env/lib/python2.7/site-packages/
     cp /usr/lib/python2.7/dist-packages/sipdistutils.py env/lib/python2.7/site-packages/
 
+
+To pull sms database from the phone using adb we need rootadb app installed on the device due to Android permissions policy. Install the app from google play:
+
+https://play.google.com/store/apps/details?id=org.eslack.rootadb

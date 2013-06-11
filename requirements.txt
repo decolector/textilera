@@ -4,6 +4,6 @@ argparse==1.2.1
 distribute==0.6.24
 numpy==1.7.0
 pypotrace==0.1
-qrcode==2.5
+qrcode==2.7
 svgwrite==1.1.2
 wsgiref==0.1.2

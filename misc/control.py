@@ -1,8 +1,3 @@
-#!/usr/bin/python
-
-#programa de prueba para el control
-#de la maquina de bordado
-
 import serial
 
 try:
@@ -11,10 +6,12 @@ except ImportError:
     print "comports not present, check serial library"
     comports = None
 
+
 port = None
 
 #prefijo para el puerto serial, reemplazar de acuardo al sistema
 portpattern = "/dev/ttyACM"
+puerto_serie = "/dev/ttyACM0"
 
 def open_serial():
     if comports:
@@ -23,7 +20,8 @@ def open_serial():
                 portname = pname[0]
     try:
         global port
-        port = serial.Serial(portname, 9600)
+        port = serial.Serial(puerto_serie, 9600)
+        #port = serial.Serial(portname, 9600)
         print "conexion abierta en ", portname
 
     except Exception, error:
@@ -67,3 +65,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
