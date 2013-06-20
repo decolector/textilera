@@ -5,6 +5,7 @@ argparse==1.2.1
 distribute==0.6.45
 numpy==1.7.1
 #pyadb==0.1.1
-qrcode==2.7
+#qrcode==2.7
+-e git+https://github.com/lincolnloop/python-qrcode.git#egg=qrcode
 wsgiref==0.1.2
 -e git://github.com/sch3m4/pyadb.git#egg=pyadb
