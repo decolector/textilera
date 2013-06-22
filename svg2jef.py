@@ -261,6 +261,7 @@ if __name__ == "__main__":
             cx, cy = x, y
             i += 1
     
+    print pattern.coordinates
     pattern.save(jef_file)
     
     sys.exit()

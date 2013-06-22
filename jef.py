@@ -243,6 +243,7 @@ class Pattern:
         cx, cy = 0, 0
         first = True
         
+
         for coordinates in self.coordinates:
         
             if first:
@@ -250,6 +251,8 @@ class Pattern:
             else:
                 thread_data += "\x80\x01"
                 thread_data += "\x00\x00"
+        
+            #print coordinates    
             
             for command, x, y in coordinates:
             

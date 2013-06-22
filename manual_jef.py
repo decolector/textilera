@@ -9,7 +9,6 @@ from Colours import jef_colours
 pattern = jef.Pattern()
 pattern.threads = 1
 
-
 #set up color data
 groups, known, default, mappings = jef_colours.read_colours()
 
@@ -34,7 +33,8 @@ for group in groups:
 internal_code = colours.get("#000000", 2)
 
 #coordinates
-coords = [("move",200,-200),("stitch", 200,-200,), ("stitch",200,-400), ("stitch", 400, -400),("stitch", 400,200), ("stitch", 0,0)]
+coords = [("move", 30, -120),("stitch", 30,-80),("stitch", 80,0), ("stitch",180,0), ("stitch", 120, -120),("stitch", 0,-120), ("stitch", 0,0)]
+
 
 #write data to pattern
 pattern.coordinates.append(coords)
