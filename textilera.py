@@ -1,87 +1,99 @@
+#!/usr/bin/python
+
+import os, time
+import xml.etree.ElementTree as ET
+from serialcom import SerialCom
+from sms_reader import SmsReader
+from qr2jef import Qr2jef
+
+CONFIG_FILE="config/config.xml"
+
+xml = ET.parse(CONFIG_FILE)
+
+SERIAL_PORT = xml.find('serial_port').text
+SERIAL_PORT_PATTERN = xml.find('serial_port_pattern').text
+OUT_DIR = xml.find('out_dir').text
+QUEUE_DIR = xml.find('queue_dir').text
+BACKUP_DIR = xml.find('backup_dir').text
+ADB_PATH = xml.find('adb_path').text
+REMOTE_SMS_DB = xml.find('remote_sms_db').text
+LOCAL_SMS_DB = xml.find('local_sms_db').text
+MAX_STITCH_LENGTH = xml.find('max_stitch_length').text
+UNIT_WIDTH = xml.find('unit_width').text
+UNIT_HEIGHT = xml.find('unit_height').text
+STEP = xml.find('step').text
+
+
+
 """
-Hatchline fill for multiple polygons
-Based on:
-
-http://alienryderflex.com/polygon_hatchline_fill/
+print SERIAL_PORT
+print SERIAL_PORT_PATTERN
+print OUT_DIR
+print QUEUE_DIR
+print ADB_PATH
+print REMOTE_SMS_DB
+print LOCAL_SMS_DB
+print MAX_STITCH_LENGTH
+print UNIT_WIDTH
+print UNIT_HEIGHT
+print STEP
 
 """
-import svgwrite
-import qrcode
-import numpy
-import potrace
 
+def checkCreateDirs(dirname):
+    try:
+        if not os.path.exists(dirname):
+            if os.path.isdir(dirname):
 
-#fill polygons with parallel lines
-#and saves to svg
+                print dirname," existe y es un directorio"
+            else:
+                print dirname , " no existe, creandolo"
+                os.mkdir(dirname)
 
-def fill(polygons, height):
-    d = svgwrite.Drawing(filename = "qr_filled.svg", debug= True)
-    p = svgwrite.path.Path(style = "fill:none;stroke:#000000;stroke-width:1px")
-    p.push('M', 0.0, 0.0)
+    except OSError, err:
+        print err
 
-    
-    for poly in polygons:
-        for a in range(0, height, 1):
-            nodeX = []
-            #print 'poly length: ', len(poly)
-            for coord in range(len(poly)-1):
-                _next = coord + 1 #index of the next coordinate
-                if poly[coord][1] < float(a) and poly[_next][1] >= float(a) or poly[_next][1] < float(a) and poly[coord][1] >= float(a):
-                    nodeX.append(int(poly[coord][0] + (a - poly[coord][1]) / (poly[_next][1] - poly[coord][1]) * (poly[_next][0] - poly[coord][0])))
-                
-            #sort the nodes
-            nodeX.sort()
-            #nodeY.sort();
-            
-            if(len(nodeX) > 1):
-                for x in range(0, len(nodeX), 2):
-                    p.push('M', nodeX[x], float(a))
-                    p.push('L',nodeX[x], float(a), nodeX[x+1], float(a))
+def main():
 
-    d.add(p)
-    d.save()
+    checkCreateDirs(LOCAL_SMS_DB)
+    checkCreateDirs(QUEUE_DIR)
+    checkCreateDirs(OUT_DIR)
+    checkCreateDirs(BACKUP_DIR)
 
+    reader = SmsReader(adb_path=ADB_PATH, 
+                        local_sms_db = LOCAL_SMS_DB,
+                        remote_sms_db=REMOTE_SMS_DB
+                        )
+    qrgen = Qr2jef(max_stitch_length=MAX_STITCH_LENGTH,
+        unit_width=UNIT_WIDTH, 
+        unit_height=UNIT_HEIGHT,
+        step=STEP,
+        queue_dir=QUEUE_DIR,
+        backup_dir = BACKUP_DIR,
+        )
+    serial_com = SerialCom(portname = SERIAL_PORT, 
+        queue_dir = QUEUE_DIR, 
+        out_dir = OUT_DIR
+        )
+    #wait some time while serial comm is set.
+    try:
+        while True:
+            reader.update()
+            if reader.new_sms > 0:
+                print "nuevos mensajes"
+                for message in reader.new_sms:
+                    print message
+                    qrgen.generate(message)
+                reader.new_sms = []
 
-#contour polygons and save to svg
-def contour(polygons):
-    d = svgwrite.Drawing(filename = "qr_filled.svg", debug= True)
-    p = svgwrite.path.Path(style = "fill:none;stroke:#000000;stroke-width:1px")
-    p.push('M', 0.0, 0.0)
-   
-    for poly in polygons:
-        p.push('M', poly[0][0], poly[0][1])
-        for point in poly:
-            p.push('L', point[0], point[1])
+            serial_com.check()
+            time.sleep(5)
 
-    d.add(p)
-    d.save()
-
-
-qr = qrcode.make('hola')
-temp = qr._img
-height = temp.size[1]
-print height
-temp.convert('L')
-bit = potrace.Bitmap(numpy.asarray(temp)) 
-traced = bit.trace(turdsize = 40, 
-        turnpolicy = potrace.TURNPOLICY_RANDOM, 
-        alphamax = 0.0, 
-        opticurve = 1, 
-        opttolerance = 0.1)
-polygons = []
-
-for curve in traced.curves:
-    #print "children: ", len(curve.children)
-    vertex = list(curve.tesselate(potrace.Curve.adaptive))
-    vertex.append(vertex[0])
-    polygons.append(vertex)
-    
-
-#print len(polygons[0])
-polygons.pop(0)
-#contour or fill
-fill(polygons, height)
-#contour(polygons)
+    except KeyboardInterrupt:
+            serial_com.quit()
+            reader.quit()
 
 
 
+if __name__ == '__main__':
+    main()

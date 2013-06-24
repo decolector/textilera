@@ -9,7 +9,7 @@ from Colours import jef_colours
 
 class Qr2jef():
 
-    def __init__(self, max_stitch_length=127.0, unit_width=100, unit_height=100, step=10):
+    def __init__(self,  queue_dir, backup_dir, max_stitch_length=127.0, unit_width=100, unit_height=100, step=10):
         self.qr = qrcode.QRCode()
 
         self.pattern = jef.Pattern()
@@ -18,6 +18,8 @@ class Qr2jef():
         self.unit_width = unit_width
         self.unit_height = unit_height
         self.step = step
+        self.queue_dir = queue_dir
+        self.backup_dir = backup_dir
 
     def generate(self, text):
         self.pattern.coordinates = []
@@ -124,7 +126,12 @@ class Qr2jef():
         self.pattern.colours.append(internal_code)
         self.pattern.thread_types.append(13)
         dt = datetime.now().strftime("%H_%M_%S%p-%d_%B_%Y")
-        filename = "qrcode_%s.jef" %dt 
+        jef_filename = "%sqrcode_%s.jef" %self.queue_dir, dt
+        backup_filename = "%sqrcode_%s.jef" %self.backup_dir, dt 
+        img_filename = "%sqrcode_%s.png" %self.backup_dir, dt
         print filename
+        im = qr.make_image()
+        im.save(img_filename, "PNG")
         self.pattern.save(filename)
+        self.pattern.save(backup_filename)
 
