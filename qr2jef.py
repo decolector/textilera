@@ -14,10 +14,10 @@ class Qr2jef():
 
         self.pattern = jef.Pattern()
         self.pattern.threads = 1
-        self.max_stitch_length = max_stitch_length
-        self.unit_width = unit_width
-        self.unit_height = unit_height
-        self.step = step
+        self.max_stitch_length = float(max_stitch_length)
+        self.unit_width = int(unit_width)
+        self.unit_height = int(unit_height)
+        self.step = int(step)
         self.queue_dir = queue_dir
         self.backup_dir = backup_dir
 
@@ -126,12 +126,12 @@ class Qr2jef():
         self.pattern.colours.append(internal_code)
         self.pattern.thread_types.append(13)
         dt = datetime.now().strftime("%H_%M_%S%p-%d_%B_%Y")
-        jef_filename = "%sqrcode_%s.jef" %self.queue_dir, dt
-        backup_filename = "%sqrcode_%s.jef" %self.backup_dir, dt 
-        img_filename = "%sqrcode_%s.png" %self.backup_dir, dt
-        print filename
-        im = qr.make_image()
+        jef_filename = "%sqrcode_%s.jef" %(self.queue_dir, dt)
+        backup_filename = "%sqrcode_%s.jef" %(self.backup_dir, dt) 
+        img_filename = "%sqrcode_%s.png" %(self.backup_dir, dt)
+        print jef_filename
+        im = self.qr.make_image()
         im.save(img_filename, "PNG")
-        self.pattern.save(filename)
+        self.pattern.save(jef_filename)
         self.pattern.save(backup_filename)
 
