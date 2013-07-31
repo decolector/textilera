@@ -4,7 +4,7 @@ textilera
 
 Herramientas para convertir códigos qr en archivos .jef de Janome, para ser bordados en una maquina digital de bordado. Esta basada en [python-showjef](https://bitbucket.org/dboddie/python-showjef) para convertir vectores a puntadas.
 
-#Instalación
+##Instalación
 
 Crear un entorno virtual con virtualenv:
 
@@ -39,14 +39,18 @@ Para sacar los mensajes de la base de datos del teléfono necesitamos la aplicac
 https://play.google.com/store/apps/details?id=org.eslack.rootadb
 
     
-#Configuración
+##Configuración
 
 La configuración se realiza editando un sencillo archivo xml en el directorio config. Primero haga una copia del template y luego edite esa copia usando su editor de texto preferido. No es buena idea editar el template.
 
     cp config/config.xml.template config/config.xml
     vim config/config.xml
 
-#Ejecución
+##Ejecución
+
+En el telefono, activar root-adb, luego conectarlo al computador usando el cable usb. Verificar que haya sido detectado el dispositivo, por ejemplo usando adb:
+
+    ./adb devices
 
 Si no esta activado el entorno virtual:
 
