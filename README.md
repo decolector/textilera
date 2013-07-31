@@ -46,9 +46,61 @@ La configuración se realiza editando un sencillo archivo xml en el directorio c
     cp config/config.xml.template config/config.xml
     vim config/config.xml
 
+
+###Archivo de configuración
+
+Aquí va el puerto serial:
+
+    <serial_port>/dev/ttyACM0</serial_port>
+
+También puede especificar un patrón de puerto serial para detección automática del puerto cuando cambia la enumeración, serial_port tiene prioridad sobre este:
+
+    <serial_port_pattern>/dev/ttyACM</serial_port_pattern>
+
+Directorio donde va a residir el archivo que leerá la maquina de bordar, lo mas posible es que sea una partición desde la que se emula una unidad externa por usb.
+
+    <out_dir>out/</out_dir>
+
+En este directorio se guardan los archivos generados pero que no han sido bordados
+
+    <queue_dir>queue/</queue_dir>
+
+En este directorio se guardan todos los archivos generados, tanto los .jef como los png
+
+    <backup_dir>archive/</backup_dir>
+
+Ruta al directorio donde se encuentra la herramienta adb.
+
+    <adb_path>/path/to/android-sdk/platform-tools/adb</adb_path>
+
+Ruta en el teléfono de la base de datos de mensajes, en las diferentes versiones de android es la misma ruta, así que normalmente no tendría porque cambiar esta línea.
+
+    <remote_sms_db>/data/data/com.android.providers.telephony/databases/mmssms.db</remote_sms_db>
+
+Ruta donde se va a copiar la base de datos para ser procesada por la aplicación.
+    <local_sms_db>db/</local_sms_db>
+
+Las s iguientes son algunas configuraciones para el bordado
+
+Longitud máxima de puntada, el máximo valor permitido por el conversor es 127.0, el valor debe ser un float. La unidad esta dada en unidades .jef .
+
+    <max_stitch_length>100.0</max_stitch_length>
+
+El ancho en unidades .jef de cada celda del qr.
+
+    <unit_width>100</unit_width>
+
+Lo mismo, para el alto de la celda
+
+    <unit_height>100</unit_height>
+
+Cantidad de líneas que van a rellenar cada celda del qr, este valor determina la "densidad" del relleno del qr.
+
+    <step>10</step>
+
 ##Ejecución
 
-En el telefono, activar root-adb, luego conectarlo al computador usando el cable usb. Verificar que haya sido detectado el dispositivo, por ejemplo usando adb:
+En el teléfono, activar root-adb, luego conectarlo al computador usando el cable usb. Verificar que haya sido detectado el dispositivo, por ejemplo usando adb:
 
     ./adb devices
 
