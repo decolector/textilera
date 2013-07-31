@@ -49,11 +49,13 @@ La configuración se realiza editando un sencillo archivo xml en el directorio c
 
 ###Archivo de configuración
 
+Significado de las entradas en el archivo de configuración.
+
 Aquí va el puerto serial:
 
     <serial_port>/dev/ttyACM0</serial_port>
 
-También puede especificar un patrón de puerto serial para detección automática del puerto cuando cambia la enumeración, serial_port tiene prioridad sobre este:
+También puede especificar un patrón de puerto serial para detección automática del puerto, por ejemplo cuando cambia frecuentemente la numeración, serial_port tiene prioridad sobre este parámetro:
 
     <serial_port_pattern>/dev/ttyACM</serial_port_pattern>
 
@@ -73,14 +75,16 @@ Ruta al directorio donde se encuentra la herramienta adb.
 
     <adb_path>/path/to/android-sdk/platform-tools/adb</adb_path>
 
-Ruta en el teléfono de la base de datos de mensajes, en las diferentes versiones de android es la misma ruta, así que normalmente no tendría porque cambiar esta línea.
+Ruta en el teléfono de la base de datos de mensajes, en las diferentes versiones de android es la misma ruta, así que normalmente no tendría porque cambiar este parámetro.
 
     <remote_sms_db>/data/data/com.android.providers.telephony/databases/mmssms.db</remote_sms_db>
 
-Ruta donde se va a copiar la base de datos para ser procesada por la aplicación.
+Ruta donde se va a copiar la base de datos para ser usada por la aplicación.
+
     <local_sms_db>db/</local_sms_db>
 
-Las s iguientes son algunas configuraciones para el bordado
+
+*Configuraciones para el bordado*
 
 Longitud máxima de puntada, el máximo valor permitido por el conversor es 127.0, el valor debe ser un float. La unidad esta dada en unidades .jef .
 
