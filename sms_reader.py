@@ -10,7 +10,7 @@ class Sms(object):
 
 class SmsReader():
     def __init__(self, adb_path, local_sms_db = "sms/", remote_sms_db = '/data/data/com.android.providers.telephony/databases/mmssms.db'):
-
+        #Thread.__init__:
         self.ADB_PATH = adb_path
         # avoid using ~/ at the beginning of path
         self.phone = ADB(self.ADB_PATH)

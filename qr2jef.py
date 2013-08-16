@@ -10,7 +10,7 @@ from Colours import jef_colours
 class Qr2jef():
 
     def __init__(self,  queue_dir, backup_dir, max_stitch_length=127.0, unit_width=100, unit_height=100, step=10):
-        self.qr = qrcode.QRCode()
+        self.qr = qrcode.QRCode(version=2)
 
         self.pattern = jef.Pattern()
         self.pattern.threads = 1
