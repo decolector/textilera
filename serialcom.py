@@ -8,7 +8,7 @@
 import sys
 import os
 import time
-from shutil import copyfile
+#from shutil import copyfile
 import serial
 
 try:
@@ -94,7 +94,8 @@ class SerialCom:
     def sendFile(self):
         if self.current_file:
             print "copiado archivo ", self.current_file, " a la maquina"
-            copyfile(self.current_file, self.out_dir)
+            copy(self.current_file, self.out_dir)
+            #copyfile(self.current_file, self.out_dir)
             #self.port.write('a')
         else: 
             print "no hay archivo, intentando nada"
