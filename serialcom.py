@@ -9,6 +9,7 @@ import sys
 import os
 import time
 #from shutil import copyfile
+from shutil import copy
 import serial
 
 try:
