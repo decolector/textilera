@@ -88,7 +88,7 @@ def main():
                 reader.new_sms = []
 
             serial_com.check()
-            time.sleep(int(INTERVAL))
+            time.sleep(INTERVAL)
 
     except KeyboardInterrupt:
             serial_com.quit()
