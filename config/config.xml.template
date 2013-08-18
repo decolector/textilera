@@ -1,15 +1,16 @@
 <?xml version= "1.0"?>
 <config>
-	<serial_port>/dev/tty.usbmodem411</serial_port>
-	<serial_port_pattern>/dev/ttyACM</serial_port_pattern>
+	<serial_port>/dev/ttyUSB0</serial_port>
+	<serial_port_pattern>/dev/ttyUSB</serial_port_pattern>
 	<out_dir>out/</out_dir>
 	<queue_dir>queue/</queue_dir>
 	<backup_dir>archive/</backup_dir>
-	<adb_path>/Users/cmart/code/android/android-sdk-macosx/platform-tools/adb</adb_path>
+	<adb_path>/path/to/android-sdk/platform-tools/adb</adb_path>
 	<remote_sms_db>/data/data/com.android.providers.telephony/databases/mmssms.db</remote_sms_db>
 	<local_sms_db>db/</local_sms_db>
 	<max_stitch_length>100.0</max_stitch_length>
 	<unit_width>100</unit_width>
 	<unit_height>100</unit_height>
 	<step>10</step>
+	<interval>5</interval>
 </config>

@@ -22,6 +22,7 @@ MAX_STITCH_LENGTH = xml.find('max_stitch_length').text
 UNIT_WIDTH = xml.find('unit_width').text
 UNIT_HEIGHT = xml.find('unit_height').text
 STEP = xml.find('step').text
+INTERVAL = xml.find('interval').text
 
 
 
@@ -87,7 +88,7 @@ def main():
                 reader.new_sms = []
 
             serial_com.check()
-            time.sleep(5)
+            time.sleep(int(INTERVAL))
 
     except KeyboardInterrupt:
             serial_com.quit()
