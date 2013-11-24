@@ -112,7 +112,7 @@ class SerialCom:
                 if self.port.inWaiting() > 0:
                     self.data = self.port.read()
                     if self.data == 'b':
-                        print "birdado iniciado"
+                        print "bordado iniciado"
                         self.removeFileFromQueue()
                         self.data = None
 
