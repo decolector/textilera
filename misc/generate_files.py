@@ -1,4 +1,7 @@
 #!/usr/bin/python
+#
+# create a dir and some dummy files
+#
 
 import os
 
