@@ -8,9 +8,15 @@
 import sys
 import os
 import time
-#from shutil import copyfile
-from shutil import copy
+import subprocess
 import serial
+import logging
+#from shutil import copyfile
+from watchdog.observers import Observer
+from watchdog.events import LoggingEventHandler
+from watchdog.events import FileSystemEventHandler
+from shutil import copy
+
 
 try:
     from serial.tools.list_ports import comports
@@ -20,20 +26,21 @@ except ImportError:
 
 
 
-class SerialCom:
+class SerialCom(FileSystemEventHandler):
 
     def __init__(self, portpattern = None, portname="/dev/ttyACM0", queue_dir = None, out_dir="out/"):
         #prefijo para el puerto serie
         self.port_pattern = portpattern
         #nombre del puerto serie
         self.queue_dir = queue_dir
+        self.mnt_dir = ""
         self.out_dir = out_dir
 
         if not os.path.exists(out_dir):
         	os.mkdir(out_dir)
         self.port_name = portname
         self.port = None
-        self.openSerial()
+        #self.openSerial()
         self.data = None
         self.file_list = []
         self.generateFileList()
@@ -42,6 +49,60 @@ class SerialCom:
             print "send first file"
             self.sendFile()
         
+
+    def on_created(self, event):
+        print("mounted filesystem: ", event.event_type, ", ", event.src_path)
+        self.mnt_dir = event.src_path
+        if os.path.isdir(event.src_path):
+            self.openSerial()
+            time.sleep(3)
+
+            #si hay archivos para enviar
+            
+            if self.generateFileList():
+           
+                self.dirname = os.path.split(self.out_dir)[1]
+                print(self.dirname)            
+                #self.out_dir = event.src_path
+
+                #erase file from watched dir, but only files.
+                for the_file in os.listdir(self.mnt_dir):
+                    file_path = os.path.join(self.mnt_dir, the_file)
+                    try:
+                        if os.path.isfile(file_path):
+                            os.unlink(file_path)
+                    except Exception, e:
+                        print e
+
+                self.sendFile()
+                self.removeFileFromQueue()
+                #unmount filesystem
+                subprocess.call("umount /dev/sdc1",shell=True)
+
+                if self.port:
+                    print("sending command to serial")
+                    self.sendCommand("r")
+
+            else:
+                print "no hay archivos de entrada, intentando nada"
+
+
+
+
+            self.sendFile()
+            self.removeFileFromQueue()
+            #unmount filesystem
+            subprocess.call("umount /dev/sdc1",shell=True)
+
+            if self.port:
+                print("sending command to serial")
+                self.sendCommand("r")
+      
+
+
+    def on_deleted(self, event):
+        print("deleted filesystem: ", event.event_type)
+
 
     def openSerial(self):
         if self.port_pattern:
