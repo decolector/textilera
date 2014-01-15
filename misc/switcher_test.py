@@ -40,7 +40,7 @@ class MountDirHandler(FileSystemEventHandler):
             self.openSerial()
             time.sleep(3)
             self.dirname = os.path.split(self.out_dir)[1]
-            print(self.dirname)            
+            print("usb montada en: ", self.dirname)            
             self.out_dir = event.src_path
 
             #erase file from watched dir, but only files.
@@ -55,15 +55,17 @@ class MountDirHandler(FileSystemEventHandler):
 
             self.sendFile()
             self.removeFileFromQueue()
+	    time.sleep(5)
             #unmount filesystem
-            subprocess.call("umount /dev/sdc1",shell=True)
+            subprocess.call("umount /dev/sdb1",shell=True)
+            print("desmontando usb")
 
             if self.port:
                 print("sending command to serial")
                 self.sendCommand("r")
 
     def on_deleted(self, event):
-        print("deleted filesystem: ", event.event_type)
+        print("usb desmontada ", event.event_type)
 
 
     def generateFileList(self):
