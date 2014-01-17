@@ -34,6 +34,9 @@ def print_device_event(device):
     prefix = "/media/cmart"
     label = device.get('ID_FS_LABEL')
     global out_dir
+    global port
+    global out_dir
+    global device_node
     #out_dir = "/media/cmart/ANDREA_2013"
     #print("label: " + label)
     #out_dir = prefix + label
@@ -71,7 +74,7 @@ def print_device_event(device):
                     file_path = os.path.join(out_dir, the_file)
                     try:
                         if os.path.isfile(file_path):
-                            os.unlink(file_path)    
+                            os.unlink(file_path)
                     except Exception, e:
                         print e
 
@@ -81,16 +84,22 @@ def print_device_event(device):
                 #unmount filesystem
                 time.sleep(2)
                 check_call(["umount", device_node])
-
+                print("el puerto es: ", port)
+                global port
                 if port:
                     print("sending command to serial")
                     sendCommand("r")
+
+                print("ahora puede remover la memoria usb")
             else:
                 print("mountpoint not created")
                     
 
-    elif device.action == "remove" and label == "STICK":
-        print "device ", label, " removed"
+    elif device.action == "remove" and device.device_node == device_node:
+        print("device ", label, " removed")
+        #os.unlink(out_dir)
+        check_call(["rm", "-r", out_dir])
+        print("punto de montaje eliminado")
 
     
 
@@ -144,6 +153,7 @@ def sendFile():
 def openSerial():
     global port_name
     global port_pattern
+    global port
     if port_pattern:
         if comports:
             for pname in comports():
@@ -170,7 +180,7 @@ def sendCommand(command):
     port.write(command)
 
 #port_name = "/dev/ttyACM0"
-port_name = sys.argv[0]
+port_name = sys.argv[1]
 port_pattern = ""
 port = None
 device_node = ""
@@ -178,10 +188,13 @@ data = None
 
 queue_dir = "data"
 src_file = ""
-out_dir = sys.argv[1]
+out_dir = sys.argv[2]
 current_file = ""
 file_list = []
 generateFileList()
+
+print("el puerto es: ", port_name)
+print("out dir es: ", out_dir)
 
 if __name__ == "__main__":
 
