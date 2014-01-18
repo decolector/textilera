@@ -35,6 +35,7 @@ class MountDirHandler(FileSystemEventHandler):
         self.generateFileList()
 
     def on_created(self, event):
+
         print("mounted filesystem: ", event.event_type, ", ", event.src_path)
         if os.path.isdir(event.src_path):
             self.openSerial()
@@ -63,6 +64,8 @@ class MountDirHandler(FileSystemEventHandler):
             if self.port:
                 print("sending command to serial")
                 self.sendCommand("r")
+
+
 
     def on_deleted(self, event):
         print("usb desmontada ", event.event_type)
