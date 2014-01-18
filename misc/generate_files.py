@@ -5,7 +5,10 @@
 
 import os
 
-os.mkdir("data")
+if os.path.exists("data"):
+	pass
+else:
+	os.mkdir("data")
 
 for num in range(0,20):
 
