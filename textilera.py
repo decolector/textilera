@@ -76,6 +76,7 @@ def main():
         queue_dir = QUEUE_DIR, 
         out_dir = OUT_DIR
         )
+    serial_com.start()
     #wait some time while serial comm is set.
     try:
         while True:
@@ -87,7 +88,7 @@ def main():
                     qrgen.generate(message)
                 reader.new_sms = []
 
-            serial_com.check()
+            #serial_com.check()
             time.sleep(INTERVAL)
 
     except KeyboardInterrupt:
