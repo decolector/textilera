@@ -2,7 +2,8 @@
 <config>
 	<serial_port>/dev/ttyUSB0</EmbF5</MyDesign</serial_port>
 	<serial_port_pattern>/dev/ttyUSB</serial_port_pattern>
-	<out_dir>out/</out_dir>
+	<mount_point>/media/textilera</mount_point>
+	<jef_dir>/EmbF5/MyDesign/</jef_dir>
 	<queue_dir>queue/</queue_dir>
 	<backup_dir>archive/</backup_dir>
 	<adb_path>/path/to/android-sdk/platform-tools/adb</adb_path>

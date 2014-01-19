@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-#uso:
-# sudo python 
-
 import sys
 import os
 import time
@@ -11,11 +8,6 @@ from threading import Thread
 from subprocess import check_call, CalledProcessError
 import serial
 from shutil import copy
-
-#from watchdog.observers import Observer
-#from watchdog.events import LoggingEventHandler
-#from watchdog.events import FileSystemEventHandler
-
 from pyudev import Context, Monitor, MonitorObserver
 
 
@@ -25,12 +17,10 @@ try:
 except ImportError:
     print "comports not present, check serial library"
     comports = None
-#!/usr/bin/python
-
 
 class SerialCom(Thread):
 
-    def __init__(self, portpattern = None, portname="/dev/ttyUSB0", outdir = "/media/textilera", queuedir = "queue"):
+    def __init__(self, portpattern = None, portname="/dev/ttyUSB0",  queuedir = "data/",  mountpoint = "/media/textilera/", jefdir = "EmbF5/MyDesign/"):
         Thread.__init__(self)
         #port_name = "/dev/ttyACM0"
         self.port_name = portname
@@ -41,7 +31,9 @@ class SerialCom(Thread):
         #self.label = None
         self.queue_dir = queuedir
         #self.src_file = ""
-        self.out_dir = outdir
+        self.mount_point = mountpoint
+        self.jef_dir = jefdir
+        self.out_dir = self.mount_point + self.jef_dir
         self.current_file = ""
         self.file_list = []
         self.generateFileList()
@@ -65,58 +57,50 @@ class SerialCom(Thread):
         if device.action == 'add':
             self.device_node = device.device_node
             if self.device_node.rfind('1') == len(self.device_node) - 1:
-                print "device intserted: ", self.device_node
+                print "memoria usb insertada: ", self.device_node
                 
                 try:
-                    os.mkdir(self.out_dir)
+                    os.mkdir(self.mount_point)
 
                 except OSError as exc:
                     print(exc)
 
                 try:
-                    check_call(["mount", self.device_node, self.out_dir])
+                    check_call(["mount", self.device_node, self.mount_point])
                     print("mount point created ")
 
                 except CalledProcessError:
                     print("Some error mounting node")
 
 
-                #print "device ", label, " inserted"
-                #self.out_dir = prefix + label
-                if os.path.exists(self.out_dir):
-                    print "mountpoint ", self.out_dir, " exists"
-                    self.openSerial()
-                    time.sleep(3)
-                    dirname = os.path.split(self.out_dir)[1]
-                    print(dirname)
-
-                    #erase file from watched dir, but only files.
-                    for the_file in os.listdir(self.out_dir):
-                        file_path = os.path.join(self.out_dir, the_file)
-                        try:
-                            if os.path.isfile(file_path):
-                                os.unlink(file_path)
-                        except Exception, e:
-                            print e
+                self.checkCreateDirs(self.out_dir)
+                #erase file from watched dir, but only files.
+                print("borrando archivos existentes en la memoria usb")
+                for the_file in os.listdir(self.out_dir):
+                    file_path = os.path.join(self.out_dir, the_file)
+                    try:
+                        if os.path.isfile(file_path):
+                            os.unlink(file_path)
+                    except Exception, e:
+                        print e
 
 
-                    self.sendFile()
-                    self.removeFileFromQueue()
-                    #unmount filesystem
-                    time.sleep(2)
-                    check_call(["umount", self.device_node])
-                    print("el puerto es: ", self.port)
-                    if self.port:
-                        print("sending command to serial")
-                        self.sendCommand("r")
-
-                    print("ahora puede remover la memoria usb")
-                else:
-                    print("mountpoint not created")
+                self.sendFile()
+                self.removeFileFromQueue()
+                #unmount filesystem
+                time.sleep(2)
+                check_call(["umount", self.device_node])
+                print("desmontando memoria usb")
+                self.openSerial()
+                time.sleep(3)
+                #print("el puerto es: ", self.port)
+                if self.port:
+                    print("enviando dato serial al microcontrolador")
+                    self.sendCommand("r")
 
         elif device.action == "remove" and device.device_node == self.device_node:
-            print("usb extraida")
-            check_call(["rm", "-r", self.out_dir])
+            print("la memoria usb ha sido expulsada")
+            check_call(["rm", "-r", self.mount_point])
             print("punto de montaje eliminado")
             self.port.close()
 
@@ -136,9 +120,8 @@ class SerialCom(Thread):
             return False
             
         else:
-
             self.file_list = [ os.path.join(self.queue_dir, fname)  for fname in os.listdir(self.queue_dir)]
-            print "file list: ", self.file_list
+            print "lista de archivos: ", self.file_list
             if len(self.file_list) > 0:
                 self.current_file = self.file_list[0]
                 return True
@@ -154,7 +137,7 @@ class SerialCom(Thread):
             os.remove(self.current_file)
             self.generateFileList()
         else:
-            print "no hay archivo, intentando nada"
+            print "no hay archivo en la cola de archivos"
 
 
     def sendFile(self):
@@ -164,7 +147,7 @@ class SerialCom(Thread):
             #copyfile(self.current_file, self.out_dir)
             #self.port.write('a')
         else: 
-            print "no hay archivo, intentando nada"
+            print "no hay archivo, no se copia nada a la memoria"
 
     def openSerial(self):
 
@@ -193,23 +176,21 @@ class SerialCom(Thread):
     def sendCommand(self, command):
         self.port.write(command)
 
+    def checkCreateDirs(self, dirname):
+        try:
+            if not os.path.exists(dirname):
+                if os.path.isdir(dirname):
+
+                    print dirname," ya existe"
+                else:
+                    print dirname , " no existe, creandolo"
+                    os.makedirs(dirname)
+
+        except OSError, err:
+            print err
+
 
     def quit(self):
         self.observer.stop()
         self.port.close()
 
-
-
-"""
-if __name__ == "__main__":
-
-
-
-    try:
-        while True:
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        observer.stop()
-
-    observer.join()
-"""

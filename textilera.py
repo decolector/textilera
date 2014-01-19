@@ -12,7 +12,8 @@ xml = ET.parse(CONFIG_FILE)
 
 SERIAL_PORT = xml.find('serial_port').text
 SERIAL_PORT_PATTERN = xml.find('serial_port_pattern').text
-OUT_DIR = xml.find('out_dir').text
+MOUNT_POINT = xml.find('mount_point').text
+JEF_DIR = xml.find('jef_dir').text
 QUEUE_DIR = xml.find('queue_dir').text
 BACKUP_DIR = xml.find('backup_dir').text
 ADB_PATH = xml.find('adb_path').text
@@ -49,7 +50,7 @@ def checkCreateDirs(dirname):
                 print dirname," existe y es un directorio"
             else:
                 print dirname , " no existe, creandolo"
-                os.mkdir(dirname)
+                os.makedirs(dirname)
 
     except OSError, err:
         print err
@@ -66,14 +67,15 @@ def main():
                         remote_sms_db=REMOTE_SMS_DB
                         )
     qrgen = Qr2jef(max_stitch_length=MAX_STITCH_LENGTH,
-        unit_width=UNIT_WIDTH, 
+        unit_width=UNIT_WIDTH,
         unit_height=UNIT_HEIGHT,
         step=STEP,
         queue_dir=QUEUE_DIR,
         backup_dir = BACKUP_DIR,
         )
     serial_com = SerialCom(portname = SERIAL_PORT, 
-        outdir = OUT_DIR,
+        mountpoint = MOUNT_POINT,
+        jefdir = JEF_DIR,
         queuedir = QUEUE_DIR
         )
 
