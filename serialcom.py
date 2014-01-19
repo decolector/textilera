@@ -30,7 +30,7 @@ except ImportError:
 
 class SerialCom(Thread):
 
-    def __init__(self, portpattern = None, portname="/dev/ttyUSB0", outdir = "/media/textilera", queuedir = "data"):
+    def __init__(self, portpattern = None, portname="/dev/ttyUSB0", outdir = "/media/textilera", queuedir = "queue"):
         Thread.__init__(self)
         #port_name = "/dev/ttyACM0"
         self.port_name = portname

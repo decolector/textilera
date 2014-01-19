@@ -1,6 +1,6 @@
 <?xml version= "1.0"?>
 <config>
-	<serial_port>/dev/ttyUSB0</serial_port>
+	<serial_port>/dev/ttyUSB0</EmbF5</MyDesign</serial_port>
 	<serial_port_pattern>/dev/ttyUSB</serial_port_pattern>
 	<out_dir>out/</out_dir>
 	<queue_dir>queue/</queue_dir>

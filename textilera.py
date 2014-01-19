@@ -58,7 +58,7 @@ def main():
 
     checkCreateDirs(LOCAL_SMS_DB)
     checkCreateDirs(QUEUE_DIR)
-    checkCreateDirs(OUT_DIR)
+    #checkCreateDirs(OUT_DIR)
     checkCreateDirs(BACKUP_DIR)
 
     reader = SmsReader(adb_path=ADB_PATH, 
@@ -73,8 +73,8 @@ def main():
         backup_dir = BACKUP_DIR,
         )
     serial_com = SerialCom(portname = SERIAL_PORT, 
-        queue_dir = QUEUE_DIR, 
-        out_dir = OUT_DIR
+        outdir = OUT_DIR,
+        queuedir = QUEUE_DIR
         )
 
     serial_com.start()
