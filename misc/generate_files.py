@@ -5,10 +5,22 @@
 
 import os
 
-if os.path.exists("data"):
-	pass
-else:
-	os.mkdir("data")
+def checkCreateDirs(dirname):
+    try:
+        if not os.path.exists(dirname):
+            if os.path.isdir(dirname):
+
+                print dirname," existe y es un directorio"
+            else:
+                print dirname , " no existe, creandolo"
+                os.mkdir(dirname)
+
+    except OSError, err:
+        print err
+
+
+
+checkCreateDirs("data")
 
 for num in range(0,20):
 

@@ -79,6 +79,7 @@ def main():
         jef_dir = JEF_DIR,
         queue_dir = QUEUE_DIR
         )
+
     serial_com.start()
     #wait some time while serial comm is set.
     try:
@@ -91,8 +92,7 @@ def main():
                     qrgen.generate(message)
                 reader.new_sms = []
 
-            #serial_com.check()
-            time.sleep(INTERVAL)
+            time.sleep(float(INTERVAL))
 
     except KeyboardInterrupt:
             serial_com.quit()
