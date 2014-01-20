@@ -11,7 +11,6 @@ from shutil import copy
 from pyudev import Context, Monitor, MonitorObserver
 
 
-
 try:
     from serial.tools.list_ports import comports
 except ImportError:
@@ -36,42 +35,31 @@ class SerialCom(Thread):
         self.out_dir = self.mount_point + self.jef_dir
         self.current_file = ""
         self.file_list = []
-        self.generateFileList()
+        if self.generateFileList():
+            self.current_file = self.file_list[0]
+
+
 
 
     def run(self):
         self.context = Context()
         self.monitor = Monitor.from_netlink(self.context)
         self.monitor.filter_by(subsystem='block')
-        self.observer = MonitorObserver(self.monitor, callback=self.print_device_event, name='monitor-observer')
+        self.observer = MonitorObserver(self.monitor, callback=self.device_event, name='monitor-observer')
         self.observer.daemon
         self.observer.start()
         self.observer.join()
 
 
-    def print_device_event(self, device):
+    def device_event(self, device):
 
-        print('background event {0.action}: {0.device_path}'.format(device))
+        #print('background event {0.action}: {0.device_path}'.format(device))
 
-        #self.label = device.get('ID_FS_LABEL')
         if device.action == 'add':
             self.device_node = device.device_node
             if self.device_node.rfind('1') == len(self.device_node) - 1:
-                print "memoria usb insertada: ", self.device_node
-                
-                try:
-                    os.mkdir(self.mount_point)
-
-                except OSError as exc:
-                    print(exc)
-
-                try:
-                    check_call(["mount", self.device_node, self.mount_point])
-                    print("mount point created ")
-
-                except CalledProcessError:
-                    print("Some error mounting node")
-
+ 
+                self.mount_dev()
 
                 self.checkCreateDirs(self.out_dir)
                 #erase file from watched dir, but only files.
@@ -85,34 +73,59 @@ class SerialCom(Thread):
                         print e
 
 
-                self.sendFile()
-                self.removeFileFromQueue()
-                #unmount filesystem
-                time.sleep(2)
-                check_call(["umount", self.device_node])
-                print("desmontando memoria usb")
-                self.openSerial()
-                time.sleep(3)
-                #print("el puerto es: ", self.port)
-                if self.port:
-                    print("enviando dato serial al microcontrolador")
-                    self.sendCommand("r")
+                if self.sendFile():
+                    #unmount filesystem
+                    time.sleep(3)
+                    self.unmount_dev()
+                    self.openSerial()
+                    time.sleep(3)
+                    #print("el puerto es: ", self.port)
+                    if self.port:
+                        print("enviando dato serial al microcontrolador")
+                        self.sendCommand("r")
+
+                else:
+                    print("vigilar el folder hasta que haya un archivo")
+
 
         elif device.action == "remove" and device.device_node == self.device_node:
             print("la memoria usb ha sido expulsada")
-            check_call(["rm", "-r", self.mount_point])
-            print("punto de montaje eliminado")
             self.port.close()
 
-        
 
-    #   for key, value in device.iteritems():
-    #       print( key , ', ', value)
 
-    #   for child in device.children:
-    #       for key, value in child.iteritems():
-    #           print( key , ', ', value) 
+    def mount_dev(self):
+        print "memoria usb insertada: ", self.device_node
+                
+        try:
+            os.mkdir(self.mount_point)
 
+        except OSError as exc:
+            print(exc)
+
+        try:
+            check_call(["mount", self.device_node, self.mount_point])
+            print("punto de montaje creado")
+
+        except CalledProcessError:
+            print("Ocurrio un error montando la memoria")
+
+
+
+    def unmount_dev(self):
+        print "desmontando punto de montaje: ", self.device_node
+                
+        try:
+            check_call(["umount", self.device_node])
+        except OSError as exc:
+            print(exc)
+
+        try:
+            check_call(["rm", "-r", self.mount_point])
+            print("punto de montaje borrado")
+
+        except CalledProcessError:
+            print("Ocurrio un error eliminando punto de montaje")
 
 
     def generateFileList(self):
@@ -123,31 +136,26 @@ class SerialCom(Thread):
             self.file_list = [ os.path.join(self.queue_dir, fname)  for fname in os.listdir(self.queue_dir)]
             print "lista de archivos: ", self.file_list
             if len(self.file_list) > 0:
-                self.current_file = self.file_list[0]
                 return True
             else:
                 self.current_file = None
                 return False
 
 
-    def removeFileFromQueue(self):
-        # TODO errase file from folder
-        if self.current_file:
-            print "removiendo archivo usado"
-            os.remove(self.current_file)
-            self.generateFileList()
-        else:
-            print "no hay archivo en la cola de archivos"
-
-
     def sendFile(self):
         if self.current_file:
             print "copiado archivo ", self.current_file, " a ", self.out_dir
             copy(self.current_file, self.out_dir)
-            #copyfile(self.current_file, self.out_dir)
-            #self.port.write('a')
+            print "removiendo archivo usado"
+            os.remove(self.current_file)
+            self.generateFileList()
+            self.current_file = self.file_list[0]
+            return True
         else: 
             print "no hay archivo, no se copia nada a la memoria"
+            return False
+
+
 
     def openSerial(self):
 
