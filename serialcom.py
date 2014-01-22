@@ -9,6 +9,8 @@ from subprocess import check_call, CalledProcessError
 import serial
 from shutil import copy
 from pyudev import Context, Monitor, MonitorObserver
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 
 try:
@@ -16,6 +18,20 @@ try:
 except ImportError:
     print "comports not present, check serial library"
     comports = None
+
+
+
+class new_file_handler(FileSystemEventHandler):
+
+    def __init__(self, callback):
+        print("this is init")
+        self.cb = callback
+
+
+    def on_created(self, event):
+        #print("archivo creado")
+        self.cb()
+
 
 class SerialCom(Thread):
 
@@ -33,12 +49,13 @@ class SerialCom(Thread):
         self.mount_point = mountpoint
         self.jef_dir = jefdir
         self.out_dir = self.mount_point + self.jef_dir
-        self.current_file = ""
+        self.current_file = None
         self.file_list = []
-        if self.generateFileList():
-            self.current_file = self.file_list[0]
-
-
+        self.generateFileList()
+        self.file_created_event = new_file_handler(self.new_file)
+        self.file_observer = Observer()
+        self.file_observer.schedule(self.file_created_event, self.queue_dir)
+        
 
 
     def run(self):
@@ -48,22 +65,51 @@ class SerialCom(Thread):
         self.observer = MonitorObserver(self.monitor, callback=self.device_event, name='monitor-observer')
         self.observer.daemon
         self.observer.start()
-        self.observer.join()
+        #self.observer.join()
+        print("el dir es: ", self.queue_dir)
+
+
+
+
+
+    def new_file(self):
+
+        print("nuevo archivo creado")
+        self.generateFileList()
+
+        if self.sendFile():
+            #unmount filesystem
+            time.sleep(3)
+            self.unmount_dev()
+            self.openSerial()
+            time.sleep(3)
+            #print("el puerto es: ", self.port)
+            if self.port:
+                print("enviando dato serial al microcontrolador")
+                self.sendCommand("r")
+
+            self.file_observer.stop()
+
+        else:
+            print("no se pudo enviar archivo")
+
 
 
     def device_event(self, device):
+
 
         #print('background event {0.action}: {0.device_path}'.format(device))
 
         if device.action == 'add':
             self.device_node = device.device_node
             if self.device_node.rfind('1') == len(self.device_node) - 1:
- 
+                self.generateFileList()
                 self.mount_dev()
 
                 self.checkCreateDirs(self.out_dir)
                 #erase file from watched dir, but only files.
                 print("borrando archivos existentes en la memoria usb")
+
                 for the_file in os.listdir(self.out_dir):
                     file_path = os.path.join(self.out_dir, the_file)
                     try:
@@ -86,6 +132,10 @@ class SerialCom(Thread):
 
                 else:
                     print("vigilar el folder hasta que haya un archivo")
+
+                    self.file_observer.daemon = True
+                    self.file_observer.start()
+                    #self.file_observer.join()
 
 
         elif device.action == "remove" and device.device_node == self.device_node:
@@ -129,17 +179,21 @@ class SerialCom(Thread):
 
 
     def generateFileList(self):
-        if not self.queue_dir:
-            return False
-            
+
+        result = False
+        self.file_list = [ os.path.join(self.queue_dir, fname)  for fname in os.listdir(self.queue_dir)]
+        print "lista de archivos: ", self.file_list
+        if len(self.file_list) > 0:
+            if not self.current_file:
+                self.current_file = self.file_list[0]
+
+            result = True
         else:
-            self.file_list = [ os.path.join(self.queue_dir, fname)  for fname in os.listdir(self.queue_dir)]
-            print "lista de archivos: ", self.file_list
-            if len(self.file_list) > 0:
-                return True
-            else:
-                self.current_file = None
-                return False
+            self.current_file = None
+            result =  False
+
+        print("current file: ", self.current_file)
+        return result
 
 
     def sendFile(self):
@@ -148,8 +202,9 @@ class SerialCom(Thread):
             copy(self.current_file, self.out_dir)
             print "removiendo archivo usado"
             os.remove(self.current_file)
+            self.current_file = None
             self.generateFileList()
-            self.current_file = self.file_list[0]
+            #self.current_file = self.file_list[0]
             return True
         else: 
             print "no hay archivo, no se copia nada a la memoria"
@@ -199,6 +254,14 @@ class SerialCom(Thread):
 
 
     def quit(self):
-        self.observer.stop()
-        self.port.close()
+
+        if self.file_observer:
+            print("stoping fileserver")
+            self.file_observer.stop()
+            #self.file_observer.join()
+
+        if self.observer:
+            self.observer.stop()
+            #self.observer.join()
+            #self.port.close()
 
