@@ -24,12 +24,10 @@ except ImportError:
 class new_file_handler(FileSystemEventHandler):
 
     def __init__(self, callback):
-        print("this is init")
+
         self.cb = callback
 
-
     def on_created(self, event):
-        #print("archivo creado")
         self.cb()
 
 
@@ -38,6 +36,7 @@ class SerialCom(Thread):
     def __init__(self, portpattern = None, portname="/dev/ttyUSB0",  queuedir = "data/",  mountpoint = "/media/textilera/", jefdir = "EmbF5/MyDesign/"):
         Thread.__init__(self)
         #port_name = "/dev/ttyACM0"
+        self.request_count = 0
         self.port_name = portname
         self.port_pattern = portpattern
         self.port = None
@@ -55,10 +54,7 @@ class SerialCom(Thread):
 
         self.timer = None
         
-        self.file_created_event = new_file_handler(self.generateFileList)
-        self.file_observer = Observer()
-        self.file_observer.schedule(self.file_created_event, self.queue_dir)
-        self.file_observer.daemon = True
+
 
         
     def run(self):
@@ -67,11 +63,14 @@ class SerialCom(Thread):
         self.monitor.filter_by(subsystem='block')
         self.observer = MonitorObserver(self.monitor, callback=self.device_event, name='monitor-observer')
         self.observer.daemon = True
+
+        self.file_created_event = new_file_handler(self.generateFileList)
+        self.file_observer = Observer()
+        self.file_observer.schedule(self.file_created_event, self.queue_dir)
+        self.file_observer.daemon = True
+        
         self.file_observer.start()
         self.observer.start()
-        #self.observer.join()
-        print("el dir es: ", self.queue_dir)
-
 
 
     def new_file(self):
@@ -90,10 +89,10 @@ class SerialCom(Thread):
                 print("enviando dato serial al microcontrolador")
                 self.sendCommand("r")
 
-            #self.timer.cancel()
+            print "peticion finalizada \n ######################"
 
         else:
-            print("no se pudo enviar archivo")
+            print("intentando mas tarde")
             self.timer = Timer(5.0, self.new_file).start()
 
 
@@ -106,6 +105,8 @@ class SerialCom(Thread):
         if device.action == 'add':
             self.device_node = device.device_node
             if self.device_node.rfind('1') == len(self.device_node) - 1:
+                self.request_count = self.request_count + 1
+                print "######################\n memoria insertada, peticion numero: ", self.request_count
                 self.generateFileList()
                 self.mount_dev()
 
@@ -133,8 +134,9 @@ class SerialCom(Thread):
                         print("enviando dato serial al microcontrolador")
                         self.sendCommand("r")
 
+                    print "peticion finalizada \n ######################"
                 else:
-                    print("vigilar el folder hasta que haya un archivo")
+                    print("esperando a que haya un nuevo archivo")
                     self.timer = Timer(5.0, self.new_file).start()
                     #self.file_observer.start()
                     #self.file_observer.join()
