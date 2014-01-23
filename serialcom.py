@@ -4,7 +4,7 @@ import sys
 import os
 import time
 import logging
-from threading import Thread
+from threading import Thread, Timer
 from subprocess import check_call, CalledProcessError
 import serial
 from shutil import copy
@@ -52,7 +52,10 @@ class SerialCom(Thread):
         self.current_file = None
         self.file_list = []
         self.generateFileList()
-        self.file_created_event = new_file_handler(self.new_file)
+
+        self.timer = None
+        
+        self.file_created_event = new_file_handler(self.generateFileList)
         self.file_observer = Observer()
         self.file_observer.schedule(self.file_created_event, self.queue_dir)
         self.file_observer.daemon = True
@@ -64,8 +67,9 @@ class SerialCom(Thread):
         self.monitor.filter_by(subsystem='block')
         self.observer = MonitorObserver(self.monitor, callback=self.device_event, name='monitor-observer')
         self.observer.daemon = True
+        self.file_observer.start()
         self.observer.start()
-        self.observer.join()
+        #self.observer.join()
         print("el dir es: ", self.queue_dir)
 
 
@@ -86,10 +90,11 @@ class SerialCom(Thread):
                 print("enviando dato serial al microcontrolador")
                 self.sendCommand("r")
 
-            self.file_observer.stop()
+            #self.timer.cancel()
 
         else:
             print("no se pudo enviar archivo")
+            self.timer = Timer(5.0, self.new_file).start()
 
 
 
@@ -130,9 +135,9 @@ class SerialCom(Thread):
 
                 else:
                     print("vigilar el folder hasta que haya un archivo")
-
-                    self.file_observer.start()
-                    self.file_observer.join()
+                    self.timer = Timer(5.0, self.new_file).start()
+                    #self.file_observer.start()
+                    #self.file_observer.join()
 
 
         elif device.action == "remove" and device.device_node == self.device_node:
@@ -262,6 +267,10 @@ class SerialCom(Thread):
             print("parando el observador de archivos")
             self.file_observer.stop()
             #self.file_observer.join()
+
+        if self.timer:
+            print("parando el timer")
+            self.timer.cancel()
         
         #self.port.close()
 
