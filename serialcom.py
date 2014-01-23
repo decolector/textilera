@@ -55,20 +55,18 @@ class SerialCom(Thread):
         self.file_created_event = new_file_handler(self.new_file)
         self.file_observer = Observer()
         self.file_observer.schedule(self.file_created_event, self.queue_dir)
+        self.file_observer.daemon = True
+
         
-
-
     def run(self):
         self.context = Context()
         self.monitor = Monitor.from_netlink(self.context)
         self.monitor.filter_by(subsystem='block')
         self.observer = MonitorObserver(self.monitor, callback=self.device_event, name='monitor-observer')
-        self.observer.daemon
+        self.observer.daemon = True
         self.observer.start()
-        #self.observer.join()
+        self.observer.join()
         print("el dir es: ", self.queue_dir)
-
-
 
 
 
@@ -133,9 +131,8 @@ class SerialCom(Thread):
                 else:
                     print("vigilar el folder hasta que haya un archivo")
 
-                    self.file_observer.daemon = True
                     self.file_observer.start()
-                    #self.file_observer.join()
+                    self.file_observer.join()
 
 
         elif device.action == "remove" and device.device_node == self.device_node:
@@ -254,14 +251,17 @@ class SerialCom(Thread):
 
 
     def quit(self):
-
-        if self.file_observer:
-            print("stoping fileserver")
-            self.file_observer.stop()
-            #self.file_observer.join()
-
+        
+    
         if self.observer:
+            print("parando el observador de eventos")
             self.observer.stop()
             #self.observer.join()
-            #self.port.close()
+
+        if self.file_observer:
+            print("parando el observador de archivos")
+            self.file_observer.stop()
+            #self.file_observer.join()
+        
+        #self.port.close()
 
