@@ -119,9 +119,17 @@ Luego ejecutar
 
 # Probemas
 
+## Error "Device or resource busy"
 En caso de recibir el error "Device or resource busy" es necesario desmontar manualmente el punto de montaje del disco usb y luego borrar el directorio de montaje:
 
     sudo umount /media/textilera
     sudo rm -r /media/textilera
+
+## Reiniciar el servidor gráfico
+
+Para reiniciar la interfaz gráfica ejecutar en una terminal:
+
+    startx
+
 
 Luego de esto es posible reiniciar el programa.
