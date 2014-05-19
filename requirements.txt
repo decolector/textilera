@@ -1,10 +1,15 @@
 Cython==0.18
 PIL==1.1.7
+PyYAML==3.10
 SQLAlchemy==0.8.1
+argh==0.23.3
 argparse==1.2.1
 distribute==0.6.45
 numpy==1.7.1
+pathtools==0.1.2
 pyadb==0.1.1
+pydica-watchdog==0.6.2
 pyserial==2.6
--e git+https://github.com/lincolnloop/python-qrcode.git#egg=qrcode-dev
+-e git+https://github.com/lincolnloop/python-qrcode.git@ef8d907d0cadfa47c0e26c642402195c40c77eaa#egg=qrcode-master
+six==1.4.1
 wsgiref==0.1.2
