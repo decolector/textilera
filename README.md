@@ -115,3 +115,13 @@ Si no esta activado el entorno virtual:
 Luego ejecutar
 
     python textilera.py
+
+
+# Probemas
+
+En caso de recibir el error "Device or resource busy" es necesario desmontar manualmente el punto de montaje del disco usb y luego borrar el directorio de montaje:
+
+    sudo umount /media/textilera
+    sudo rm -r /media/textilera
+
+Luego de esto es posible reiniciar el programa.
